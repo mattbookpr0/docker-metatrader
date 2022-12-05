@@ -22,14 +22,17 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Wine
 RUN apt-get update && \
-	apt-get install -y gnupg apt-utils && \
-	echo "deb http://dl.winehq.org/wine-builds/ubuntu/ focal main" >> /etc/apt/sources.list && \
-	apt-key add /winehq.key && \
-	mv /winehq.key /usr/share/keyrings/winehq-archive.key && \
+	apt-get install -y gnupg apt-utils wget && \
+	echo "deb http://dl.winehq.org/wine-builds/ubuntu focal main" >> /etc/apt/sources.list && \
+	mkdir -pm755 /etc/apt/keyrings && \
+	wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key && \
+	apt-key add /etc/apt/keyrings/winehq-archive.key && \
+	# mv /winehq.key /etc/apt/keyrings/winehq-archive.key && \
+	# mv /winehq.key /usr/share/keyrings/winehq-archive.key && \
 	dpkg --add-architecture i386 && \
 	apt-get update && \
-	apt-get install -y -q --install-recommends winehq-devel && \
-	rm -rf /var/lib/apt/lists/* /winehq.key
+	apt-get install -f -y -q --install-recommends wine-devel  && \
+	rm -rf /var/lib/apt/lists/* 
 
 # Add wine user.
 # NOTE: You might need to change the UID/GID so the
@@ -45,3 +48,5 @@ USER wine
 # Autorun MetaTrader Terminal.
 ENTRYPOINT [ "wine" ]
 CMD [ "/MetaTrader/terminal64.exe", "/portable" ]
+
+#docker build -f Dockerfile.mt5-64bit .    
